@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.myapplication.FeedReaderContract.FeedEntry;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -121,34 +120,39 @@ public class MainActivity extends AppCompatActivity {
         mostrarMensaje("Se actualizó " + count + " registro(s)");
     }
 
-    // MI VERSIÓN: Eliminar todavía no aparece en las capturas
+    // ---------- DELETE ----------
+
     public void Eliminar(View vista) {
         String id = leerId();
         if (id == null) return;
+
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int filas = db.delete(FeedEntry.nameTable, FeedEntry._ID + " = ?",
-                new String[]{id});
-        mostrarMensaje(filas > 0 ? "Persona eliminada" : "No existe una persona con ese ID");
-        limpiar();
+        String selection = FeedReaderContract.FeedEntry._ID + " = ?";
+        String[] selectionArgs = {id};
+        int deletedRows = db.delete(FeedReaderContract.FeedEntry.nameTable, selection, selectionArgs);
+        if (deletedRows > 0) {
+            limpiarCampos();
+        }
+        mostrarMensaje("Se eliminó " + deletedRows + " registro(s)");
     }
 
-    // MI VERSIÓN: leerId() no aparece en las capturas
+    /** Devuelve el Id escrito, o null (y avisa) si el campo esta vacio. */
     private String leerId() {
         String id = txtid.getText().toString().trim();
         if (id.isEmpty()) {
-            mostrarMensaje("Ingrese el id");
+            mostrarMensaje("Ingrese el Id del registro");
             return null;
         }
         return id;
     }
 
-    private void limpiar() {
+    private void limpiarCampos() {
         txtid.setText("");
         txtnombre.setText("");
         txtapellido.setText("");
     }
 
-    private void mostrarMensaje(String texto) {
-        Toast.makeText(this, texto, Toast.LENGTH_SHORT).show();
+    private void mostrarMensaje(String mensaje) {
+        Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show();
     }
 }
